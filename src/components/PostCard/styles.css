@@ -1,0 +1,12 @@
+.post {
+  box-shadow: 0 0 10px rgba(0,0,0, 0.1);
+}
+
+.post img {
+  width: 100%;
+}
+
+.post-content {
+  width: 100%;
+  padding: 5px 10px;
+}
