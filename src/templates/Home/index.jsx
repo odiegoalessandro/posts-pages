@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Button } from "../../components/Button"
 import { Posts } from "../../components/Posts"
 import { TextInput } from "../../components/TextInput"
@@ -12,22 +12,23 @@ export const Home = () => {
   const [allPosts, setAllPosts] = useState([])
   const [page, setPage] = useState(0)
   const postsPerPage = 10
-
-  useEffect(() => {
-    handleLoadPosts()
-  }, [])
-
-  const handleLoadPosts = async () => {
+  const noMorePosts = page + postsPerPage >= allPosts.length
+  
+  const filteredPosts = searchValue 
+    ? allPosts.filter(post => post.title.includes(searchValue)) 
+    : posts
+  
+    const handleLoadPosts = useCallback(async () => {
     const posts = await loadPosts()
   
     setPosts(posts.slice(page, postsPerPage))
     setAllPosts(posts)
-  }
-
+  }, [page])
+  
   const handleChange = (e) => {
     setSearchValue(e.target.value)
   }
-
+  
   const loadMorePosts = () => {
     const nextPage = page + postsPerPage
     const nextPosts = allPosts.slice(nextPage, nextPage + postsPerPage)
@@ -35,11 +36,10 @@ export const Home = () => {
     setPosts(prev => [...prev, ...nextPosts])
     setPage(nextPage)
   }
-
-  const noMorePosts = page + postsPerPage >= allPosts.length
-  const filteredPosts = searchValue 
-    ? allPosts.filter(post => post.title.includes(searchValue)) 
-    : posts
+  
+  useEffect(() => {
+    handleLoadPosts()
+  }, [handleLoadPosts])
 
   return (
     <section className="container">
