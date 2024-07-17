@@ -20,8 +20,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:no-watch": "react-scripts test --watchAll=false",
     "eject": "react-scripts eject",
-    "lint": "eslint ./src/**/*.{js,jsx}"
+    "lint": "eslint -c .eslintrc ./src",
+    "lint:fix": "eslint -c .eslintrc.js ./src --fix",
+    "prepare": "husky install"
   },
   "eslintConfig": {
     "extends": [
@@ -50,6 +53,7 @@
     "eslint-plugin-promise": "^6.4.0",
     "eslint-plugin-react": "^7.34.4",
     "globals": "^15.8.0",
+    "msw": "^2.3.1",
     "prettier": "^3.3.3"
   }
 }
