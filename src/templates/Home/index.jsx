@@ -1,45 +1,44 @@
-import { useCallback, useEffect, useState } from "react"
-import { Button } from "../../components/Button"
-import { Posts } from "../../components/Posts"
-import { TextInput } from "../../components/TextInput"
-import { loadPosts } from "../../utils/loadPosts"
-import "./styles.css"
+import { useCallback, useEffect, useState } from "react";
+import { Button } from "../../components/Button";
+import { Posts } from "../../components/Posts";
+import { TextInput } from "../../components/TextInput";
+import { loadPosts } from "../../utils/loadPosts";
+import "./styles.css";
 
 export const Home = () => {
-  const [searchValue, setSearchValue] = useState("")
-  const [posts, setPosts] = useState([])
-  const [allPosts, setAllPosts] = useState([])
-  const [page, setPage] = useState(0)
-  const postsPerPage = 10
-  const noMorePosts = page + postsPerPage >= allPosts.length
+  const [searchValue, setSearchValue] = useState("");
+  const [posts, setPosts] = useState([]);
+  const [allPosts, setAllPosts] = useState([]);
+  const [page, setPage] = useState(0);
+  const postsPerPage = 10;
+  const noMorePosts = page + postsPerPage >= allPosts.length;
   
   const filteredPosts = searchValue 
     ? allPosts.filter(post => post.title.includes(searchValue)) 
-    : posts
+    : posts;
   
   const handleLoadPosts = useCallback(async () => {
-    const loadedPosts = await loadPosts()
+    const loadedPosts = await loadPosts();
 
-    setAllPosts(loadedPosts)
-    setPosts(loadedPosts.slice(0, postsPerPage))
-    setPosts(loadedPosts.slice(0, postsPerPage))
-  }, [])
+    setAllPosts(loadedPosts);
+    setPosts(loadedPosts.slice(0, postsPerPage));
+  }, []);
 
   const handleChange = (e) => {
-    setSearchValue(e.target.value)
-  }
+    setSearchValue(e.target.value);
+  };
   
   const loadMorePosts = () => {
-    const nextPage = page + postsPerPage
-    const nextPosts = allPosts.slice(nextPage, nextPage + postsPerPage)
+    const nextPage = page + postsPerPage;
+    const nextPosts = allPosts.slice(nextPage, nextPage + postsPerPage);
     
-    setPosts(prev => [...prev, ...nextPosts])
-    setPage(nextPage)
-  }
+    setPosts(prev => [...prev, ...nextPosts]);
+    setPage(nextPage);
+  };
   
   useEffect(() => {
-    handleLoadPosts()
-  }, [handleLoadPosts])
+    handleLoadPosts();
+  }, [handleLoadPosts]);
 
   return (
     <section className="container">
@@ -59,5 +58,5 @@ export const Home = () => {
         ) }
       </div>
     </section>
-  )
-}
+  );
+};

@@ -10,5 +10,5 @@ export const TextInput = ({ searchValue, onChange }) => {
       onChange={onChange}
       placeholder="Search here"
     />
-  )
-}
+  );
+};
