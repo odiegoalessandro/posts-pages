@@ -127,7 +127,132 @@ memoização é o ato de guardar uma informação na mémoria(cache) da aplicaç
 useRef é uma forma de manipular o HTML real da página, você pode adicionar foco ao elemento, blur, pegar os valores dele e etc. Vale dizer
 que ele pode modificar o valor dentro do elemento assim possibilitando modificar o valor mostrado em tela sem re-renderizar o componente.
 
+*Notas:* um outro exemplo de uso do `useRef` é armazenar intervalos para que possam ser eliminados quando o componente for desmontado. Aqui vai um exemplo de hook que podemos criar com isso:
+
+```js
+  function useInterval(callback, delay) {
+    const savedCallback = useRef()
+  
+    // guarda o último callback em memoria
+    useEffect(() => {
+      savedCallback.current = callback
+    }, [callback])
+  
+    // Configura o intervalo
+    useEffect(() => {
+      function tick() {
+        savedCallback.current()
+      }
+      if (delay !== null) {
+        let id = setInterval(tick, delay)
+        return () => clearInterval(id)
+      }
+    }, [delay])
+  }
+```
+
+Esse hook foi criado por um desenvolvedor da meta, é muito interessante ver esse caso de uso, isso mostra um dos varios jeitos que os react-hooks podem ser utilizados, então sempre que possivel teste novas coisas, saia da caixinha.
+
 ## useContext e ContextApi
 
 a ContextApi veio como uma forma de gerenciar estados de maneira nativa, eliminando a necessidade de bibliotecas redux e outras para
-state manegement.
+state manegement. Exemplo de uso da ContextApi:
+
+```js
+  // context/auth.js
+  
+  export const AuthContext = createContext()
+```
+
+```js
+  // App.jsx
+  
+  import { AuthContext } from "./context/auth.js"
+
+  export default function App(){
+    const [auth, setAuth] = useState(null)
+    
+    return (
+      <AuthContext.Provider value={{ auth, setAuth }} >
+        // restante da aplicação
+      <AuthContext.Provider>
+    )
+  }
+```
+
+```js
+  // components/AuthSession.jsx
+
+  import { AuthContext } from "./context/auth.js"
+
+  export default function AuthSession(){
+    const { auth, setAuth } = useContext(AuthContext)
+
+    return (
+      <div>
+        autenticado
+      </div>
+    )
+  }
+```
+
+Normalmente utilzariamos `useReducer` porém como ainda não vimos esse hook vou deixar como `useState` por enquanto, no futuro faremos um novo exemplo utilizando o `useReducer`. Após esse disclaimer vamos falar um pouco sobre recomendações sobre como usar contextos e tudo mais.
+
+1. Não utilize um único contexto para toda sua aplicação, imagine só a complexidade de um contexto de um site como o `Facebook` por exemplo, ele deve lidar com autenticação, temas, preferencias do úsuario e outras milhares de coisas, nesse caso se vc utilizar um único estado sempre que você chamar seu contexto ele vai ser gigante, imagine só, para carregar uma informação simples como o nome do usuário todo seu contexto está sendo carregado novamente, com o tempo isso vai gerar grandes leaks de memoria.
+2. Sempre se pergunte "isso realmente deve ser colocado dentro de um contexto?", muitas vezes a resposta será não.
+
+## useReducer
+
+`useReducer` funciona de maneira semelhante ao `useState` a diferença é que adicionamos mais algumas lógicas dentro dele, basicamente o `useState` apenas muda o estado, enquanto o `useReducer` tem toda um logica por trás com tipos especificos de mudança de estado. Um bom exemplo disso seria um reducer de um usuario, onde ao invés da logica do usuario ter que ficar do lado do componente ela é isolada dentro do hook, possibilitando um código limpo e organizado, além de garantir a mudança de estado de maneira correta nesse exemplo poderiamos migrar o estado do usuário para um reducer e definir 2 tipos de ação `login` e `logout` assim evitando possiveis erros humanos e padronizando a troca de estados. Exemplo de um reducer:
+
+```js
+const authState = {
+  user: 'diego',
+  role: 'ADMIN'
+}
+
+const reducer = (state, action) => {
+  switch(action.type){
+    case 'login':
+      return { 
+        user: action.payload.username, 
+        role: action.payload.role 
+      }
+    case 'logout':
+      return null
+  }
+}
+
+export default function App(){
+  const [state, dispatch] = useReducer(reducer, authState)
+
+  
+  return (
+    <div>
+      { state && <h1>{state.user} {state.role}</h1> }
+      
+      <button onClick={() => dispatch({ 
+        type: 'login',
+        payload: ...authState
+      })}>
+        Login
+      </button>
+      
+      <button onClick={() => dispatch({ 
+        type: 'logout',
+        payload: null
+      })}>
+        Logout
+      </button>
+    </div>
+  )
+}
+```
+
+O `useReducer` é um hook que juntamente com a ContextApi tem a intenção de substituir o Redux. E realmente ContextApi + useReducer é uma forte combinação.
+
+**Atenção:** Na hora de usar `useReducer` devemos criar funções auxiliares para fazer cada tipo de ação como boa prática, visando isolar o código e usar algo parecido com o padrão de [Adapter](https://refactoring.guru/design-patterns/adapter)
+
+## React custom hooks
+
+dentro do react podemos criar hooks próprios, é uma maneira de dividir o código em partes menores, evitando um `god object`. Recomendo ler o [artigo](https://overreacted.io/making-setinterval-declarative-with-react-hooks/) do Dan Abramov sobre isso.
