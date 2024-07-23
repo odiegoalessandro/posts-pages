@@ -256,3 +256,53 @@ O `useReducer` é um hook que juntamente com a ContextApi tem a intenção de su
 ## React custom hooks
 
 dentro do react podemos criar hooks próprios, é uma maneira de dividir o código em partes menores, evitando um `god object`. Recomendo ler o [artigo](https://overreacted.io/making-setinterval-declarative-with-react-hooks/) do Dan Abramov sobre isso.
+
+## useLayoutEffect
+
+é muito semelhante ao `useEffect` porém é utilizado quando precisamos manipular o DOM cordenadamente com um dado. Vamos supor que você executar uma função muito demorada e após isso mostrar o resultado dela em tela, para que não haja um grande delay entre o gatilho dessa função até a execução dela podemos utilizar o `useLayoutEffect`. Exemplo de código com `useLayoutEffect`:
+
+```js
+  export const Home = () => {
+    const [counted, setCounted] = useState([0, 1, 2, 3, 4])
+    const divRef = useRef()
+
+    useLayoutEffect(() => {
+      const now = Date.now()
+      while (Date.now() < now + 1500)
+      divRef.current.scrollTop = divRef.current.scrollHeight
+    })
+
+    const handleClick = () => {
+      setCounted((c) => [...c, +c.slice(-1) + 1])
+    }
+
+    return (
+      <>
+        <button onClick={handleClick}>Count {counted.slice(-1)}</button>
+        <div ref={divRef} style={{ height: '100px', width: '100px', overflowY: 'scroll' }}>
+          {counted.map((c) => {
+            return <p key={`c-${c}`}>{c}</p>
+          })}
+        </div>
+      </>
+    )
+  }
+```
+
+**Atenção:** não é recomendando utilizar este hook, apenas o utilize quando não houver outro recurso, nós demais casos tente ao máximo sanar seus problemas com `useEffect`
+
+## forwardRef e useImperativeRef
+
+o forwardRef te ajuda a passar ref`s de componentes pais para componentes filhos, useImperativeRef permite passar um ref dentro de outro ref. Lembrando que não é uma boa prática utilizar esse tipo de hook.
+
+## Ordem de execução dos hooks
+
+![React Hook Flow Diagram](/images/hook-flow.png)
+
+1. Primeiro executamos os incializadores juntamente com os states
+2. O componente é renderizado
+3. os useLayoutEffect são limpos
+4. os useLayoutEffect são executados
+5. Navegador desenha a tela
+6. useEffect são limpos
+7. useEffect são executados
