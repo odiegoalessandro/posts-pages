@@ -289,7 +289,7 @@ dentro do react podemos criar hooks próprios, é uma maneira de dividir o códi
   }
 ```
 
-**Atenção:** não é recomendando utilizar este hook, apenas o utilize quando não houver outro recurso, nós demais casos tente ao máximo sanar seus problemas com `useEffect`
+**Atenção**: não é recomendando utilizar este hook, apenas o utilize quando não houver outro recurso, nós demais casos tente ao máximo sanar seus problemas com `useEffect`
 
 ## forwardRef e useImperativeRef
 
@@ -306,3 +306,70 @@ o forwardRef te ajuda a passar ref`s de componentes pais para componentes filhos
 5. Navegador desenha a tela
 6. useEffect são limpos
 7. useEffect são executados
+
+## Compound Components
+
+[compound pattern](https://medium.com/@vitorbritto/react-design-patterns-compound-component-pattern-ec247f491294) é um padrão afim de evitar o `prop drilling`, é basicamente a prática de passar uma prop do elemento pai para varios elementos filhos até chegar no componente que realmente precisa desta prop.
+Vale lembra que esse é um recurso muito poderoso que vem de maneira nativa no `React` mas que muitos desenvolvedores não sabem ou negligenciam a sua existencia. Exemplo de código feito com `compound components`:
+
+```js
+const ListItem = ({ children, style }) => (
+  <li style={style}>
+    {children}
+  </li>
+)
+
+const List = ({ children }) => {
+  
+  return (
+    <ul>
+       {
+        Children.map(children, (child, index) => {
+          if (React.isValidElement(child)) {
+            return cloneElement(child, {
+              style: {
+                 backgroundColor: index % 2 === 0 ? "red" : "blue" }
+            });
+          }
+          return child;
+        })
+      }
+    </ul>
+  )
+} 
+
+
+export default function CompoundComponents(){
+  return (
+    <List>
+      <ListItem>teste</ListItem>
+      <ListItem>teste</ListItem>
+      <ListItem>teste</ListItem>
+      <ListItem>teste</ListItem>
+      <ListItem>teste</ListItem>
+      <ListItem>teste</ListItem>
+      <ListItem>teste</ListItem>
+      <ListItem>teste</ListItem>
+    </List>
+  )
+}
+```
+
+alguns podem se questionar "mas não seria mais fácil utilizar a ContextApi para isso?", e a resposta é não exatamente, ela pode sim ser uma boa ferramenta mas neste caso ela poderia trazer diversos problemas como:
+
+1. problemas de performance: o valor de um contexto pode causar renderizações desnecessarias no consumo do componente, mesmo se as mudanças não forem relavantes pra esse componente em especifico.
+2. complexidade na hora de testar: testar componentes que usem contextos podem ser bem mais complexos comparados a componentes baseado em `props`. Mockar ou fornecer o valor do contexto correto durante os testes requerem uma configuração adicional e podem fazer os testes unitarios mais complexos.
+3. encapsulamento excessivo: o uso excessivo da `ContextApi` é prejudicial para o projeto como um todo, dificultando o entendimento do código.
+4. tipagem invalida: os valores do contexto não tem os tipos validados por padrão, significa que o uso incorreto ou mudanãs no corpo do contexto podem não capturadas pelo compilador ou developer tools. Isso pode acarretar em erros e desafios na hora de debuggar.
+5. problemas de escalabilidade: a `ContextApi` pode ser dificl para escalar e se manter em um app de grande escala.
+
+em contraponto os `Compound Components` trazem diversas vantagens como:
+
+1. Reutilização: Como os componentes individuais dentro de um componente composto são projetados para funcionar juntos, eles podem ser facilmente reutilizados em diferentes partes da sua aplicação sem a necessidade de duplicar código ou funcionalidade. Isso pode ajudar a reduzir a complexidade geral do seu código e facilitar a manutenção e atualização da sua aplicação ao longo do tempo.
+2. Flexibilidade: Componentes compostos fornecem uma maneira flexível de construir componentes de UI complexos, mantendo uma API limpa e concisa. Esse padrão permite criar componentes altamente personalizáveis e reutilizáveis sem precisar passar muitos props para o componente.
+3. Separação de Preocupações: Com componentes compostos, cada componente filho é responsável por sua funcionalidade específica, tornando mais fácil manter e atualizar componentes individuais sem afetar todo o sistema.
+4. API Intuitiva: Ao encapsular componentes filhos relacionados dentro de um componente pai, o padrão de Componentes Compostos oferece uma API clara e intuitiva, fácil de entender e usar por outros desenvolvedores.
+5. Personalização Aprimorada: Este padrão permite que os desenvolvedores troquem ou estendam facilmente os componentes filhos, levando a uma personalização aprimorada.
+6. Consistência: Ao fornecer uma interface consistente para interagir com um componente composto, o padrão de componente composto pode ajudar a melhorar a experiência do usuário da sua aplicação.
+7. Menos Prop Drilling: Em componentes compostos, em vez de passar estado através de props, passamos elementos como filhos para um elemento pai. Isso permite que o pai gerencie o estado implícito e reduz a necessidade de prop drilling.
+8. Manutenibilidade:* Componentes compostos fornecem uma maneira mais flexível de compartilhar estado dentro de aplicações React, tornando mais fácil manter e depurar suas aplicações ao fazer uso de componentes compostos.
